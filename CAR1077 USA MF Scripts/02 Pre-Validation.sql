@@ -1,0 +1,110 @@
+ SELECT CegEarnGroupCode FROM EarnGrp
+
+ /*SR ACCO 
+OD811E  
+MECHANI 
+SM#02E  */ 
+
+select jbcjobcode, jbclongdesc from jobcode where jbcjobcode like '%SRA%' 
+
+
+
+select Distinct eepcompanycode as CoCode , EepAddressState, EecLocation from lodepers join lodecomp on eeppendingupdateid=eecpendingupdateid join ACE_ONEVal on eecpendingupdateid=ONEpendingupdateid and EEcRECID=ONERECID where ONEErrorCode = 'E0021' and oneTable = 'LodEComp' and ONEProcess = 'PDLOD';
+ 
+
+
+ select distinct eepcompanycode as CoCode   ,    EecSITWorkInStateCode, EecLocation  , locsitworkinstatecode
+ from LODWKETX join lodepers on wetpendingupdateid=eeppendingupdateid 
+ join lodecomp on eeppendingupdateid=eecpendingupdateid
+ join ACE_ONEVal on wetpendingupdateid=ONEpendingupdateid 
+ join location on eeclocation =loccode 
+ and wetrecid=ONErecid where ONEErrorCode= 'E0143' and oneTable = 'LodWkEtx LodEComp'  and ONEProcess = 'PDLOD';
+
+ select loccode from location where loccode ='0091'
+
+
+select distinct eepcompanycode as CoCode, eecempno as EmpNo, Eepssn as SSN, eepnamefirst as FirstName, eepnamelast as LastName
+,  eecemplstatus as EmplStatus  , EecSITWorkInStateCode, EecLocation , locsitworkinstatecode 
+from LODWKETX join lodepers on wetpendingupdateid=eeppendingupdateid 
+join lodecomp on eeppendingupdateid=eecpendingupdateid 
+join ACE_ONEVal on wetpendingupdateid=ONEpendingupdateid  and wetrecid=ONErecid   
+  join location on eeclocation =loccode
+where ONEErrorCode= 'E0143' and oneTable = 'LodWkEtx LodEComp'  and ONEProcess = 'PDLOD';
+
+--- Invalid Job Code 
+
+ select Distinct eepcompanycode as CoCode, eecempno as EmpNo, eepnamefirst as FirstName, eepnamelast as LastName,  eecemplstatus as EmplStatus, eeCJobCode as InvalidJobCode from lodepers join lodecomp on eeppendingupdateid=eecpendingupdateid join ACE_ONEVal on eecpendingupdateid=ONEpendingupdateid and EEcRECID=ONERECID where ONEErrorCode = 'E0019' and oneTable = 'LodEComp' and ONEProcess = 'PDLOD' and eecjobcode not in (select jbcjobcode from jobcode);
+
+
+--101 01013935 Stephanie Jones A SR ACCO - Should be ACTS2E
+
+Begin Tran 
+Update LodEComp Set EecJobCode = 'ACTS2E' Where EecJobCode = 'SR ACCO'; 
+-- commit 
+ 
+--101 01017864 Harrison Rabenold A OD811E - Should be SV801E
+
+Begin Tran 
+Update LodEComp Set EecJobCode = 'SV801E' Where EecJobCode = 'OD811E'; 
+-- commit 
+
+--101 01019375 Daniel Fernandez A MECHANI - Should be MBH06H
+
+Begin Tran 
+Update LodEComp Set EecJobCode = 'MBH06H' Where EecJobCode = 'MECHANI'; 
+-- commit 
+
+
+--101 01019498 Shuralee Lamb A SM#02E - Should be MGO01E
+
+Begin Tran 
+Update LodEComp Set EecJobCode = 'MGO01E' Where EecJobCode = 'SM#02E'; 
+-- commit
+
+
+--- Invalid Location Code 
+select Distinct eepcompanycode as CoCode, eecempno as EmpNo, eepnamefirst as FirstName, eepnamelast as LastName,  eecemplstatus as EmplStatus, EepAddressState, EecLocation from lodepers join lodecomp on eeppendingupdateid=eecpendingupdateid join ACE_ONEVal on eecpendingupdateid=ONEpendingupdateid and EEcRECID=ONERECID where ONEErrorCode = 'E0021' and oneTable = 'LodEComp' and ONEProcess = 'PDLOD';
+
+update lodecomp set eeclocation ='0097R ' from lodecomp where eeclocation ='097R'
+
+
+select loccode from location where loccode like '%97R' 
+
+--=======================
+
+--ONEErrorCODE = 'E0233'
+SELECT eecpendingupdateid as PendingUpdateID , eecCompanyCode as CoCode, eecempno as EmpNo, Eepssn as SSN, eepnamefirst as FirstName, eepnamelast as LastName, eecemplstatus as EmplStatus, EecDateOfLastHire, EecDateOfOriginalHire 
+FROM LODEPERS 
+JOIN ACE_ONEVal ON ONEPENDINGUPDATEID=EEPPENDINGUPDATEID 
+JOIN LODECOMP ON eepPENDINGUPDATEID=EECPENDINGUPDATEID WHERE EECRECID = ONERECID AND ONEErrorCODE = 'E0233' and oneTable = 'LodEComp' and ONEProcess = 'PDLOD';
+
+--UPDATE
+begin tran
+Update LodeComp Set EecDateOfLastHire = EecDateOfOriginalHire 
+Where EecDateOfLastHire IS NOT NULL 
+AND EecDateOfOriginalHire IS NOT NULL 
+AND EecDateOfLastHire < EecDateOfOriginalHire;
+--commit
+---------=======
+select  retpendingupdateid, eecCompanyCode as CoCode, eecempno as EmpNo, Eepssn as SSN, eepnamefirst as FirstName, eepnamelast as LastName,    EepAddressState, eecemplstatus as EmplStatus, EemUFWStateSDI, RetSRCSITResidentCode, RetUFWFilingStatusSITR, WetUFWFilingStatusSITW, eemufwfilingstatusfed, oneField, ONEFieldValue from lodepers INNER JOIN  lodecomp   on eeppendingupdateid=eecpendingupdateid  INNER JOIN  lodeemst   on eeppendingupdateid=eempendingupdateid  INNER JOIN  dbo.Location    ON dbo.Location.LocCode = dbo.LodEComp.EecLocation INNER JOIN   dbo.LodWkEtx ON dbo.LodWkEtx.WetPendingUpdateID = dbo.LodEComp.EecPendingUpdateID INNER JOIN  dbo.LodRsEtx ON dbo.LodRsEtx.RetPendingUpdateID = dbo.LodEComp.EecPendingUpdateID INNER JOIN ACE_ONEVal on ONEPENDINGUPDATEID=RETPENDINGUPDATEID  WHERE  ONEErrorCODE = 'E0075' and oneTable = 'LodEEMst LodWkEtx'  and ONEProcess = 'PDLOD' order by eecemplstatus;
+
+select * from lodeemst
+
+-- Re run validation in Launch or 
+ exec ACEsp_OneVal    'PDLOD'
+  exec ACEsp_OneVal_detail    'PDLOD'
+
+ select Distinct
+			ErrorCode	= dbo.iex_fn_trim(oneErrorCode),
+			TableName	= dbo.iex_fn_trim(oneTable),
+			FieldName	= dbo.iex_fn_trim(oneField),
+			ErrorDesc	= dbo.iex_fn_trim(oneDescription),
+			ErrorVal	= ovcSQLValidation,
+			ErrorSelect	= ovcSQLReview,
+			ErrorUpdate	= ovcSQLUpdateExamples,
+			ErrorNotes	= ovcNotes
+		-- select *
+		from dbo.ACE_OneVal
+		left join dbo.ACE_OneVal_Catalog on ovcID = oneID --ovcProcess = oneProcess and ovcErrorCode = oneErrorCode and ovcTable = oneTable and ovcField = oneField
+		where oneTable like 'LOD%' 
+	 		order by TableName, ErrorCode, FieldName, ErrorDesc, ErrorSelect, ErrorUpdate;
